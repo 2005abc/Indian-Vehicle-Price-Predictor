@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Indian Vehicle Price Predictor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .result h2 {
+            color: #27ae60;
+            margin-top: 0;
+        }
+        
+        .price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .rupee-symbol {
+            font-family: sans-serif;
+        }
+        
+        .trend-note {
+            font-style: italic;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Indian Vehicle Price Predictor</h1>
+        
+        <form id="vehicleForm">
+            <div class="features">
+                <div class="form-group">
+                    <label for="vehicleType">Vehicle Type</label>
+                    <select id="vehicleType" required>
+                        <option value="">Select vehicle type</option>
+                        <option value="car">Car</option>
+                        <option value="bike">Bike</option>
+                        <option value="scooter">Scooter</option>
+                        <option value="truck">Truck</option>
+                        <option value="bus">Bus</option>
+                        <option value="tractor">Tractor</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="make">Make/Brand</label>
+                    <select id="make" required>
+                        <option value="">Select make</option>
+                        <!-- Indian vehicle brands will be populated by JavaScript -->
+                    </select>
+                </div>
+            </div>
+            
+            <div class="features">
+                <div class="form-group">
+                    <label for="model">Model</label>
+                    <input type="text" id="model" required placeholder="e.g., Nexon EV, Activa 6G">
+                </div>
+                
+                <div class="form-group">
+                    <label for="year">Manufacturing Year</label>
+                    <input type="number" id="year" min="2010" max="2025" required>
+                </div>
+            </div>
+            
+            <div class="features">
+                <div class="form-group">
+                    <label for="mileage">Mileage (km)</label>
+                    <input type="number" id="mileage" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="condition">Condition</label>
+                    <select id="condition" required>
+                        <option value="">Select condition</option>
+                        <option value="excellent">Excellent (Like new)</option>
+                        <option value="good">Good (Minor wear)</option>
+                        <option value="fair">Fair (Needs some repairs)</option>
+                        <option value="poor">Poor (Needs major repairs)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="features">
+                <div class="form-group">
+                    <label for="fuelType">Fuel Type</label>
+                    <select id="fuelType" required>
+                        <option value="">Select fuel type</option>
+                        <option value="petrol">Petrol</option>
+                        <option value="diesel">Diesel</option>
+                        <option value="cng">CNG</option>
+                        <option value="electric">Electric</option>
+                        <option value="hybrid">Hybrid</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="engineSize">Engine Capacity (cc)</label>
+                    <input type="number" id="engineSize" min="50" max="10000" required>
+                </div>
+            </div>
+            
+            <button type="submit">Predict Price</button>
+        </form>
+        
+        <div class="result" id="result">
+            <h2>Predicted Market Value</h2>
+            <div class="price"><span class="rupee-symbol">₹</span> <span id="predictedPrice">0</span></div>
+            <p>Based on the vehicle details you provided, this is the estimated market value for 2025.</p>
+            <p id="priceNote"></p>
+            <p class="trend-note" id="trendNote"></p>
+        </div>
+    </div>
+
+    <script>
+        // 2025 Indian vehicle brands data
+        const vehicleBrands2025 = {
+            car: [
+                "Maruti Suzuki", "Hyundai", "Tata", "Mahindra", "Toyota", 
+                "Honda", "Kia", "Volkswagen", "Skoda", "Renault",
+                "Nissan", "MG", "BYD", "Jeep", "BMW",
+                "Mercedes", "Audi", "Volvo", "Jaguar", "Land Rover"
+            ],
+            bike: [
+                "Bajaj", "Hero", "Honda", "TVS", "Royal Enfield",
+                "Yamaha", "KTM", "Suzuki", "Jawa", "Ola",
+                "Ather", "Benelli", "Kawasaki", "Triumph"
+            ],
+            scooter: [
+                "Honda", "TVS", "Bajaj", "Suzuki", "Yamaha",
+                "Hero", "Ola", "Ather", "Vespa"
+            ],
+            truck: [
+                "Tata", "Ashok Leyland", "Mahindra", "BharatBenz", "Eicher",
+                "Volvo", "Scania"
+            ],
+            bus: [
+                "Tata", "Ashok Leyland", "Volvo", "Eicher", "Mahindra",
+                "BharatBenz", "BYD"
+            ],
+            tractor: [
+                "Mahindra", "Sonalika", "TAFE", "Escorts", "John Deere",
+                "New Holland", "Kubota", "CNH", "Force"
+            ],
+            other: [
+                "Other Brand"
+            ]
+        };
+
+        // Populate make dropdown based on vehicle type
+        document.getElementById('vehicleType').addEventListener('change', function() {
+            const vehicleType = this.value;
+            const makeSelect = document.getElementById('make');
+            
+            // Clear existing options
+            makeSelect.innerHTML = '<option value="">Select make</option>';
+            
+            if (vehicleType && vehicleBrands2025[vehicleType]) {
+                vehicleBrands2025[vehicleType].forEach(make => {
+                    const option = document.createElement('option');
+                    option.value = make.toLowerCase().replace(/\s+/g, '-');
+                    option.textContent = make;
+                    makeSelect.appendChild(option);
+                });
+            }
+        });
+
+        document.getElementById('vehicleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const vehicleType = document.getElementById('vehicleType').value;
+            const make = document.getElementById('make').value;
+            const model = document.getElementById('model').value;
+            const year = parseInt(document.getElementById('year').value);
+            const mileage = parseInt(document.getElementById('mileage').value);
+            const condition = document.getElementById('condition').value;
+            const fuelType = document.getElementById('fuelType').value;
+            const engineSize = parseInt(document.getElementById('engineSize').value);
+            
+            // Prediction
+            const { predictedPrice, trendMessage } = predict2025Price(vehicleType, make, year, mileage, condition, fuelType, engineSize);
+            
+            // Display result
+            document.getElementById('predictedPrice').textContent = predictedPrice.toLocaleString('en-IN');
+            document.getElementById('result').style.display = 'block';
+            
+            // Add price note
+            const priceNote = document.getElementById('priceNote');
+            if (condition === 'excellent') {
+                priceNote.textContent = "This vehicle is in excellent condition and may command a premium price in the 2025 market.";
+            } else if (condition === 'poor') {
+                priceNote.textContent = "This vehicle needs significant repairs. The price reflects its current condition in 2025.";
+            } else {
+                priceNote.textContent = "This is a fair market price based on 2025 trends and vehicle condition.";
+            }
+            
+            // Add market trend note
+            document.getElementById('trendNote').textContent = trendMessage;
+            
+            // Scroll to result
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // 2025 Price Prediction Algorithm
+        function predict2025Price(vehicleType, make, year, mileage, condition, fuelType, engineSize) {
+            const currentYear = 2025;
+            const age = currentYear - year;
+            
+            // Base price based on vehicle type (2025 average ex-showroom price when new in ₹)
+            const vehicleTypeBasePrices2025 = {
+                'car': 800000,
+                'bike': 120000,
+                'scooter': 90000,
+                'truck': 3500000,
+                'bus': 5500000,
+                'tractor': 1000000,
+                'other': 400000
+            };
+            
+            let basePrice = vehicleTypeBasePrices2025[vehicleType] || 400000;
+            
+            // 2025 Brand value adjustments
+            const brandFactors2025 = {
+                // Cars
+                'maruti-suzuki': 1.05,
+                'hyundai': 1.1,
+                'tata': 1.2,       // Strong EV portfolio boosts value
+                'mahindra': 1.15,   // SUV and EV focus
+                'kia': 1.1,
+                'mg': 1.1,
+                'toyota': 1.1,
+                'honda': 1.05,
+                'byd': 1.25,        // Chinese EV premium
+                // Bikes
+                'royal-enfield': 1.4,
+                'ola': 1.3,         // EV two-wheeler premium
+                'ather': 1.25,
+                // Luxury
+                'mercedes': 1.8,
+                'bmw': 1.7,
+                'audi': 1.75
+            };
+            
+            basePrice *= brandFactors2025[make] || 1.0;
+            
+            // Age depreciation (2025 trends)
+            let annualDepreciation = 0.17; // Default 17% per year
+            if (vehicleType === 'truck' || vehicleType === 'bus') {
+                annualDepreciation = 0.13; // Commercial vehicles depreciate slower
+            } else if (vehicleType === 'tractor') {
+                annualDepreciation = 0.11; // Tractors hold value well
+            } else if (vehicleType === 'bike' || vehicleType === 'scooter') {
+                annualDepreciation = 0.19; // Two-wheelers depreciate faster
+            }
+            
+            // EVs depreciate slower
+            if (fuelType === 'electric') {
+                annualDepreciation *= 0.85;
+            }
+            
+            // Apply age depreciation
+            basePrice *= Math.pow(1 - annualDepreciation, age);
+            
+            // Mileage depreciation (2025 rates)
+            let mileageRate = 2.5; // ₹2.5 per km for cars
+            if (vehicleType === 'bike' || vehicleType === 'scooter') {
+                mileageRate = 0.6;
+            } else if (vehicleType === 'truck' || vehicleType === 'bus') {
+                mileageRate = 4.0;
+            }
+            
+            // EVs have higher mileage depreciation due to battery concerns
+            if (fuelType === 'electric') {
+                mileageRate *= 1.3;
+            }
+            
+            const mileageDepreciation = mileage * mileageRate;
+            basePrice -= mileageDepreciation;
+            
+            // Condition adjustment (2025)
+            const conditionFactors2025 = {
+                'excellent': 1.25,
+                'good': 1.0,
+                'fair': 0.7,
+                'poor': 0.4
+            };
+            basePrice *= conditionFactors2025[condition] || 1.0;
+            
+            // 2025 Fuel type adjustments
+            const fuelTypeFactors2025 = {
+                'diesel': 0.92,     // Diesel vehicles declining in value
+                'cng': 0.88,        // CNG seen as outdated
+                'electric': 1.25,   // EVs in high demand
+                'hybrid': 1.15      // Hybrids also popular
+            };
+            basePrice *= fuelTypeFactors2025[fuelType] || 1.0;
+            
+            // Engine size adjustment
+            let engineFactor = 1 + (Math.log(engineSize/1000) * 0.18);
+            basePrice *= engineFactor;
+            
+            // Ensure minimum price (2025)
+            const minPrices2025 = {
+                'car': 80000,
+                'bike': 15000,
+                'scooter': 12000,
+                'truck': 400000,
+                'bus': 700000,
+                'tractor': 200000,
+                'other': 30000
+            };
+            
+            basePrice = Math.max(minPrices2025[vehicleType] || 30000, basePrice);
+            
+            // Round to nearest 1000
+            const finalPrice = Math.round(basePrice / 1000) * 1000;
+            
+            // Generate market trend message for 2025
+            let trendMessage = "2025 Market Trends: ";
+            if (fuelType === 'electric') {
+                trendMessage += "EVs are maintaining strong resale values due to high demand and government incentives.";
+            } else if (fuelType === 'diesel') {
+                trendMessage += "Diesel vehicles are losing value faster due to stricter emission norms in 2025.";
+            } else if (fuelType === 'hybrid') {
+                trendMessage += "Hybrid vehicles have good resale value as a transition technology in 2025.";
+            } else {
+                trendMessage += "Conventional vehicles are following normal depreciation patterns in 2025.";
+            }
+            
+            return {
+                predictedPrice: finalPrice,
+                trendMessage: trendMessage
+            };
+        }
+    </script>
+</body>
+</html>
+
+    
